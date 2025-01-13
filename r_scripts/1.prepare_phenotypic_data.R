@@ -20,7 +20,7 @@ if (length(args) == 1){
     y = 'data/feno_pisa.dat',
     env = 'data/herd_codici_pisa.csv',
     ped = 'data/ped.csv.gz',
-    outdir = 'Analysis/1.prep',
+    outdir = 'Analysis/prepped_files',
     force_overwrite = FALSE
   ))
   
@@ -167,5 +167,5 @@ temp <- temp |>
 ## creating output folder if not there
 dir.create(file.path(config$base_folder, config$outdir), showWarnings = FALSE, recursive = TRUE)
 
-fname = file.path(config$base_folder, config$outdir, 'pheno.dat')
+fname = file.path(config$base_folder, config$outdir, 'pheno.csv')
 fwrite(x = temp, file = fname, col.names = TRUE)
