@@ -46,7 +46,8 @@ feno <- feno |>
          Herd = str_trim(Herd, "both"),
          THI = as.numeric(str_trim(THI, "both")),
          Hum = as.numeric(str_trim(Hum, "both")),
-         MaxT = as.numeric(str_trim(MaxT, "both"))
+         MaxT = as.numeric(str_trim(MaxT, "both")),
+         Dp = as.numeric(str_trim(Dp, "both"))
   )
 
 summary(feno$scc)
@@ -97,7 +98,7 @@ feno$sire = ped$sire[match(feno$Id, ped$id)]
 #####################
 
 feno_red <- feno |>
-  select(Id, prov, rec_year, Milk, DIM, Age, THI, Hum, MaxT, sire)
+  select(Id, prov, rec_year, Milk, DIM, Age, THI, Hum, MaxT, sire, Dp, rec_month, rec_day)
 
 feno_red <- na.omit(feno_red)
 feno_red <- filter(feno_red, sire > 0)
@@ -154,13 +155,18 @@ df$ratio = df$n_sire/tot_sires
 temp <- feno_red |>
   filter(prov %in% c("CR","MN","CN"), rec_year == 2021)
 
-temp <- temp |>
+X <- temp |>
+  group_by(sire, prov) |>
+  summarise(DIM = mean(DIM), age = mean(Age), dp = mean(Dp), 
+            rec_month = mean(rec_month), rec_day = mean(rec_day))
+
+Y <- temp |>
   select(-c(Id)) |>
   group_by(sire, prov) |>
   summarise(milk = mean(Milk), age = mean(Age), DIM = mean(DIM), 
             THI = mean(THI), maxT = mean(MaxT), humidity = mean(Hum))
 
-temp <- temp |>
+Y <- Y |>
   select(-c("DIM","age","THI","humidity","maxT")) |>
   spread(key = prov, value = milk)
 
@@ -168,4 +174,11 @@ temp <- temp |>
 dir.create(file.path(config$base_folder, config$outdir), showWarnings = FALSE, recursive = TRUE)
 
 fname = file.path(config$base_folder, config$outdir, 'pheno.csv')
-fwrite(x = temp, file = fname, col.names = TRUE)
+fwrite(x = Y, file = fname, col.names = TRUE)
+
+X <- Y |>
+  gather(key = "prov", value = "milk", -sire) |>
+  left_join(X, by = c("sire", "prov"))
+
+fname = file.path(config$base_folder, config$outdir, 'covariates.csv')
+fwrite(x = X, file = fname, col.names = TRUE)
