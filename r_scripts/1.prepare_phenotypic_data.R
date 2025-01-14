@@ -178,7 +178,8 @@ fwrite(x = Y, file = fname, col.names = TRUE)
 
 X <- Y |>
   gather(key = "prov", value = "milk", -sire) |>
-  left_join(X, by = c("sire", "prov"))
+  left_join(X, by = c("sire", "prov")) |>
+  select(-milk)
 
 fname = file.path(config$base_folder, config$outdir, 'covariates.csv')
 fwrite(x = X, file = fname, col.names = TRUE)
