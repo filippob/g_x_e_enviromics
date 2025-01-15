@@ -3,9 +3,9 @@
 # GxE using marker-by-environment interactions
 
 
-# (2) Using genomic relationships
+# (2) Using genomic or pedigree relationships
 
-#A model equivalent to the one presented above can be implemented using G-matrices (or factorizations of it) 
+#A model equivalent to the one that uses single marker data (SNP-BLUP) can be implemented using G-matrices (or factorizations of it) 
 # with off-diagonal blocks zeroed out for interactions
 
 ######################################################################################################################
@@ -88,11 +88,11 @@ tst <- sample(1:n, size=test_size, replace=FALSE)
 yNA[tst, "value"] <- NA
 
 writeLines(" - extracting eigenvalues and eigenvectors from the kinship matrix")
-# EVD = eigen(kk)
-# PC = EVD$vectors[,EVD$values > config$evd_threshold]   # 599 x 598 ? SELECT THRESHOLD TO RETAIN PC's
-# for(i in 1:ncol(PC)){ PC[,i]=EVD$vectors[,i]*sqrt(EVD$values[i]) }  #? eigenvectors multiplied by the sqrt of the corresponding eigenvalues
+EVD = eigen(kk)
+PC = EVD$vectors[,EVD$values > config$evd_threshold]   # 599 x 598 ? SELECT THRESHOLD TO RETAIN PC's
+for(i in 1:ncol(PC)){ PC[,i]=EVD$vectors[,i]*sqrt(EVD$values[i]) }  #? eigenvectors multiplied by the sqrt of the corresponding eigenvalues
 
-load("Analysis/BGLR/princ_comps.RData")
+# load("Analysis/BGLR/princ_comps.RData")
 
 writeLines(" - preparing design matrices for multiple envs")
 ## make "p" copies of PC <-- "p" phenotypes (same pheno in "p" envs, same sample IDs: this is why it is duplicated)
@@ -154,7 +154,7 @@ if (ntraits == 2) {
 # BGLR MODEL -------------------------------------------------------------------
 print("Running the BGLR model - kinship matrix")
 experiment = "milk"
-dirname = file.path(config$base_folder,config$outdir,experiment)
+dirname = file.path(config$base_folder, config$outdir, experiment)
 dir.create(dirname, recursive = TRUE, showWarnings = FALSE)
 outpath = file.path(dirname, config$prefix)
 fmGRM = BGLR(y=yNA$value,ETA=LP,
