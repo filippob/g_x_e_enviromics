@@ -166,6 +166,9 @@ Y <- temp |>
   summarise(milk = mean(Milk), age = mean(Age), DIM = mean(DIM), 
             THI = mean(THI), maxT = mean(MaxT), humidity = mean(Hum))
 
+envtypes <- Y |>
+  select("sire","prov","THI","humidity","maxT")
+
 Y <- Y |>
   select(-c("DIM","age","THI","humidity","maxT")) |>
   spread(key = prov, value = milk)
@@ -183,3 +186,7 @@ X <- Y |>
 
 fname = file.path(config$base_folder, config$outdir, 'covariates.csv')
 fwrite(x = X, file = fname, col.names = TRUE)
+
+fname = file.path(config$base_folder, config$outdir, 'enviro_typing.csv')
+fwrite(x = envtypes, file = fname, col.names = TRUE)
+
